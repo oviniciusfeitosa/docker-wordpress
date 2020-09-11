@@ -1,30 +1,31 @@
 version: "3.3"
 
 services:
-  db:
+  app-db-service:
     user: root
     image: mysql:5.7
     volumes:
-      - database_pcc:/var/lib/mysql
+      - /data/app/database:/var/lib/mysql
+      - ./database/restore-scripts:/docker-entrypoint-initdb.d/:ro
     restart: always
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: somewordpress
       MYSQL_DATABASE: pcc
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: wordpress
 
-  wordpress:
+  app-wordpress-service:
     user: root
     depends_on:
-      - db
+      - app-db-service
     image: wordpress:latest
     ports:
-      - "80:80"
+      - "2000:80"
     restart: always
     environment:
-      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_HOST: app-db-service:3306
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: pcc
@@ -34,4 +35,4 @@ services:
       - ./wp-content/uploads:/var/www/html/wp-content/uploads
     # - ./themes:/var/www/html/wp-content/themes
 volumes:
-  database_pcc: {}
+  app-database: {}
